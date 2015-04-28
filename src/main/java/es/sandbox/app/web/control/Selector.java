@@ -1,6 +1,6 @@
 package es.sandbox.app.web.control;
 
-import org.apache.commons.collections.SetUtils;
+import es.sandbox.app.web.control.Transformer.NopTransformer;
 
 import java.util.*;
 
@@ -12,7 +12,8 @@ public class Selector {
     private String path;
     private final String urlPattern;
     private SortedSet<Option> options;
-    private String hdivFormState;
+    private String csrf;
+    private Transformer transformer;
 
     public Selector(final String path) {
         this(path, null);
@@ -22,10 +23,21 @@ public class Selector {
         this.path = path;
         this.urlPattern = urlPattern;
         this.options = new TreeSet<>();
+        this.transformer = new NopTransformer();
+    }
+
+    public void setTransformer(final Transformer transformer) {
+        if (transformer != null) {
+            this.transformer = transformer;
+        }
+    }
+
+    private Transformer getTransformer() {
+        return this.transformer;
     }
 
     public String getPath() {
-        return path;
+        return this.path;
     }
 
     public void add(final Option option) {
@@ -33,7 +45,11 @@ public class Selector {
     }
 
     public SortedSet<Option> getOptions() {
-        return SetUtils.unmodifiableSortedSet(this.options);
+        final SortedSet<Option> sortedOptions = new TreeSet<>();
+        for (Option option : this.options) {
+            sortedOptions.add(getTransformer().transform(this.path, option));
+        }
+        return sortedOptions;
     }
 
     public Map<String, String> getUrls() {
@@ -55,7 +71,7 @@ public class Selector {
         return String.format(this.urlPattern, option.getValue());
     }
 
-    public String getHdivFormState() {
-        return hdivFormState;
+    public String getCsrf() {
+        return getTransformer().getCsrf();
     }
 }

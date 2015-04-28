@@ -92,25 +92,24 @@
     <script>
         var urls = {};
 
-        <%--urls['${firstValues.path}'] = '${firstValues.urls}';--%>
         <c:if test="${not empty firstValues.urls}">
             urls['${firstValues.path}'] = {
                 <c:forEach items="${firstValues.urls}" var="url" varStatus="status">
-                '${url.key}': '<spring:url value="${url.value}"/>'<c:if test="${!status.last}">, </c:if>
+                '${url.key}': '<spring:url value="${url.value}"><spring:param name="${modifyHDIVStateParameter}" value="${hdivFormStateId}" /></spring:url>'<c:if test="${!status.last}">, </c:if>
                 </c:forEach>
             };
         </c:if>
         <c:if test="${not empty secondValues.urls}">
         urls['${secondValues.path}'] = {
             <c:forEach items="${secondValues.urls}" var="url" varStatus="status">
-            '${url.key}': '<spring:url value="${url.value}"/>'<c:if test="${!status.last}">, </c:if>
+            '${url.key}': '<spring:url value="${url.value}"><spring:param name="${modifyHDIVStateParameter}" value="${hdivFormStateId}" /></spring:url>'<c:if test="${!status.last}">, </c:if>
             </c:forEach>
         };
         </c:if>
         <c:if test="${not empty thirdValues.urls}">
         urls['${thirdValues.path}'] = {
             <c:forEach items="${thirdValues.urls}" var="url" varStatus="status">
-            '${url.key}': '<spring:url value="${url.value}"/>'<c:if test="${!status.last}">, </c:if>
+            '${url.key}': '<spring:url value="${url.value}"><spring:param name="${modifyHDIVStateParameter}" value="${hdivFormStateId}" /></spring:url>'<c:if test="${!status.last}">, </c:if>
             </c:forEach>
         };
         </c:if>
@@ -141,7 +140,7 @@
                 $.getJSON(modifyUrl(url, hdivFormStateParameter, modifyHdivFormStateParameter), function (data) {
 
                     var targetSelector = $("#" + onSelectPopulateThis).empty();
-                    var newHdivFormState = data.hdivFormState;
+                    var newHdivFormState = data.csrf;
 
                     $(hdivFormStateParameter).val(newHdivFormState);
 

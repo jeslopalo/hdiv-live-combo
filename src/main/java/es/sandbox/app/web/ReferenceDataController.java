@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.inject.Inject;
+
 /**
  * Created by jeslopalo on 24/04/15.
  */
@@ -23,6 +25,7 @@ public class ReferenceDataController {
         this.transformer= new NopTransformer();
     }
 
+    @Inject
     public ReferenceDataController(final Transformer transformer) {
         this.transformer= transformer;
     }
@@ -31,6 +34,7 @@ public class ReferenceDataController {
     public Selector getFirstValues(@RequestParam(value = "path", required = true) final String path) {
         final Selector selector = new Selector(path, "http://localhost:8080/data/second-values?path=" + path + "&firstValue=%s");
 
+        selector.setTransformer(this.transformer);
         selector.add(new Option("Choose one...", null));
         selector.add(new Option("value 1", 1));
         selector.add(new Option("value 2", 2));
@@ -42,6 +46,7 @@ public class ReferenceDataController {
     @RequestMapping(value = "/second-values", method = RequestMethod.GET)
     public Selector getSecondValues(@RequestParam(value = "path", required = true) final String path, @RequestParam("firstValue") final String firstValue) {
         final Selector selector = new Selector(path, "http://localhost:8080/data/third-values?path=" + path + "&firstValue=" + firstValue + "&secondValue=%s");
+        selector.setTransformer(this.transformer);
         selector.add(new Option("Choose one...", null));
 
         if (NumberUtils.isNumber(firstValue)) {
@@ -55,6 +60,7 @@ public class ReferenceDataController {
     @RequestMapping(value = "/third-values", method = RequestMethod.GET)
     public Selector getThirdValues(@RequestParam(value = "path", required = true) final String path, @RequestParam("firstValue") final String firstValue, @RequestParam("secondValue") final String secondValue) {
         final Selector selector = new Selector(path);
+        selector.setTransformer(this.transformer);
         selector.add(new Option("Choose one...", null));
 
         if (NumberUtils.isNumber(firstValue) && NumberUtils.isNumber(secondValue)) {
