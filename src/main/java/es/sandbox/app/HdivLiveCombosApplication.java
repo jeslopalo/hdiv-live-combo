@@ -14,16 +14,27 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+import org.springframework.web.context.ServletContextAware;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
+import javax.servlet.ServletContext;
+
 @SpringBootApplication
-public class HdivLiveCombosApplication {
+public class HdivLiveCombosApplication implements ServletContextAware {
+
+    private ServletContext servletContext;
 
     @Bean
     public HdivTransformer hdivTransformer() {
-        return new HdivTransformer();
+        return new HdivTransformer(this.servletContext);
     }
+
+    @Override
+    public void setServletContext(final ServletContext servletContext) {
+        this.servletContext = servletContext;
+    }
+
 
     @Bean
     public WebConfig webConfig() {
@@ -50,7 +61,10 @@ public class HdivLiveCombosApplication {
 
             builder
                     .randomName(true)
-                    .strategy(Strategy.CIPHER)
+                    .reuseExistingPageInAjaxRequest(true)
+                    .strategy(Strategy.MEMORY)
+                    .maxPagesPerSession(100)
+                    .debugMode(false)
                     .sessionExpired()
                     .homePage("/");
         }

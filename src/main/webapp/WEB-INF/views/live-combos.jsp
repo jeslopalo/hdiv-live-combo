@@ -9,6 +9,8 @@
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
 <%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<!DOCTYPE html>
 <html>
 <head>
     <title>Live combos demo page</title>
@@ -26,25 +28,44 @@
 </head>
 <body>
 <section class="container">
-    <spring:url value="/" var="homeUrl"/>
-    <h1><a href="${homeUrl}">Home</a></h1>
+    <header>
+        <spring:url value="/" var="homeUrl"/>
+        <h1><a href="${homeUrl}">Hdiv Live combos</a></h1>
+    </header>
 
     <spring:url var="actionUrl" value="/live-combos"/>
-    <form:form action="${actionUrl}" modelAttribute="form">
+    <form:form action="${actionUrl}" modelAttribute="liveCombosForm">
 
-        <div style="border: 1px solid red; display: block; padding: 1em; ">
-            <form:errors path="*"/>
-        </div>
+        <spring:bind path="*">
+            <c:choose>
+                <c:when test="${fn:length(status.errorMessages) eq 1}">
+                    <div class="alert alert-danger">
+                        <c:forEach var="message" items="${status.errorMessages}">
+                            <span>${message}</span>
+                        </c:forEach>
+                    </div>
+                </c:when>
+                <c:when test="${fn:length(status.errorMessages) gt 1}">
+                    <div class="alert alert-danger">
+                        <ul>
+                            <c:forEach var="message" items="${status.errorMessages}">
+                                <li>${message}</li>
+                            </c:forEach>
+                        </ul>
+                    </div>
+                </c:when>
+            </c:choose>
+        </spring:bind>
 
         <div class="row">
             <div class="col-md-4">
-                <form:select path="firstValue" cssClass="form-control" data-populate-with-selection="secondValue">
+                <form:select path="firstValue" cssClass="form-control">
                     <form:options items="${firstValues.options}" itemLabel="label" itemValue="value"/>
                 </form:select>
             </div>
 
             <div class="col-md-4">
-                <form:select path="secondValue" cssClass="form-control" data-populate-with-selection="thirdValue">
+                <form:select path="secondValue" cssClass="form-control">
                     <form:options items="${secondValues.options}" itemLabel="label" itemValue="value"/>
                 </form:select>
             </div>
@@ -59,45 +80,17 @@
         <input type="submit" class="btn btn-default"/>
     </form:form>
 </section>
-<%--<section class="container" style="width: 75%; white-space: nowrap; overflow:hidden; text-overflow: ellipsis;">
-    <div style="padding: 1em;">
-        ModifyHdivStateParameter= ${modifyHDIVStateParameter} <br/>
-        HdivFormStateId= ${hdivFormStateId}
-    </div>
 
-    <div style="padding: 1em;">
-        <script>
-            var hdivFormState = $("form input[type=hidden][name!=_csrf]").last();
-
-            $(function () {
-                hdivFormState.on("change", function () {
-                    window.console.log("Modificado el hdivFormState...");
-                    $("#hdivFormState").text($(this).attr("name"));
-                    $("#hdivFormStateValue").text($(this).val());
-                });
-                $("#hdivFormState").text(hdivFormState.attr("name"));
-                $("#hdivFormStateValue").text(hdivFormState.val());
-            });
-        </script>
-        <div>HdivFormState= <span id="hdivFormState"></span></div>
-        <div>HdivFormStateValue= <span id="hdivFormStateValue"></span></div>
-    </div>
-</section>
-<section class="container" style="width: 75%; white-space: nowrap; overflow:hidden; text-overflow: ellipsis;">
-    <c:forEach items="${firstValues.urls}" var="value">
-        ${value.key} : ${value.value}<br/>
-    </c:forEach>
-</section>--%>
 <section id="map" class="container" style="width: 75%; white-space: nowrap; overflow:hidden; text-overflow: ellipsis;">
     <script>
         var urls = {};
 
         <c:if test="${not empty firstValues.urls}">
-            urls['${firstValues.path}'] = {
-                <c:forEach items="${firstValues.urls}" var="url" varStatus="status">
-                '${url.key}': '<spring:url value="${url.value}"><spring:param name="${modifyHDIVStateParameter}" value="${hdivFormStateId}" /></spring:url>'<c:if test="${!status.last}">, </c:if>
-                </c:forEach>
-            };
+        urls['${firstValues.path}'] = {
+            <c:forEach items="${firstValues.urls}" var="url" varStatus="status">
+            '${url.key}': '<spring:url value="${url.value}"><spring:param name="${modifyHDIVStateParameter}" value="${hdivFormStateId}" /></spring:url>'<c:if test="${!status.last}">, </c:if>
+            </c:forEach>
+        };
         </c:if>
         <c:if test="${not empty secondValues.urls}">
         urls['${secondValues.path}'] = {
@@ -114,46 +107,47 @@
         };
         </c:if>
 
-        $(function () {
-            $("#map span").text(JSON.stringify(urls));
-        });
-
-        function modifyUrl(url, hdivFormStateParameter, modifyHdivFormStateParameter) {
-            window.console.log(url + " " + hdivFormStateParameter + " " + modifyHdivFormStateParameter);
-//            return url + "&" + modifyHdivFormStateParameter + "=" + $(hdivFormStateParameter).val();
+        function modifyUrl(url, modifyHdivFormStateParameter, hdivFormState) {
+/*
+            if (hdivFormState && url.indexOf(modifyHdivFormStateParameter) == -1) {
+                window.console.log("Adding modify hdiv state parameter:\n" + url + "&" + modifyHdivFormStateParameter + "=" + hdivFormState);
+                return url + "&" + modifyHdivFormStateParameter + "=" + hdivFormState;
+            }
+*/
+            window.console.log("Modify hdiv state paramter is already in url (or its not needed): " + url);
             return url;
         }
 
         $(function () {
-            $("form select").change(function () {
-                var selectName = $(this).attr("name");
-                var selectedValue = $(this).find("option:selected").val();
+            var modifyHdivFormStateParameter = "${modifyHDIVStateParameter}";
 
-                var onSelectPopulateThis = $(this).data("populate-with-selection");
+            $("form select").change(function () {
+                var changedSelector = $(this);
+                var selectName = changedSelector.attr("name");
+                var selectedValue = changedSelector.find("option:selected").val();
 
                 var url = urls[selectName][selectedValue];
 
-                var hdivFormStateParameter= $("form input[type=hidden][name!=_csrf]").last();
-                var modifyHdivFormStateParameter= "${modifyHDIVStateParameter}";
+                if (url) {
+                    var hdivFormStateHiddenInput = $("form input[type=hidden][name!=_csrf]").last();
 
+                    $.getJSON(modifyUrl(url, modifyHdivFormStateParameter, hdivFormStateHiddenInput.val()), function (data) {
 
-                $.getJSON(modifyUrl(url, hdivFormStateParameter, modifyHdivFormStateParameter), function (data) {
+                        if(data.csrf != null) {
+                            hdivFormStateHiddenInput.val(data.csrf);
+                        }
+                        var targetControl = $("#" + data.path).empty();
 
-                    var targetSelector = $("#" + onSelectPopulateThis).empty();
-                    var newHdivFormState = data.csrf;
+                        $.each(data.options, function (index, option) {
+                            targetControl.append("<option value='" + option.value + "'>" + option.label + "</option>");
+                        });
 
-                    $(hdivFormStateParameter).val(newHdivFormState);
-
-                    $.each(data.options, function (index, option) {
-                        targetSelector.append("<option value='" + option.value + "'>" + option.label + "</option>");
+                        urls[data.path] = data.urls;
                     });
-
-                    urls[onSelectPopulateThis]= data.urls;
-                });
+                }
             });
         })
     </script>
-    <span></span>
 </section>
 
 </body>

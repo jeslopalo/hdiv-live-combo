@@ -19,6 +19,11 @@ public class Option implements Comparable<Option> {
         this.value = value;
     }
 
+    public Option(String label) {
+        this.label = label;
+        this.value = null;
+    }
+
     public String getLabel() {
         return label;
     }
