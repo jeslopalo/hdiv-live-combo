@@ -9,16 +9,24 @@ import org.hdiv.config.Strategy;
 import org.hdiv.config.annotation.ExclusionRegistry;
 import org.hdiv.config.annotation.builders.SecurityConfigBuilder;
 import org.hdiv.config.annotation.configuration.HdivWebSecurityConfigurerAdapter;
+import org.hdiv.dataComposer.DataComposerCipher;
+import org.hdiv.dataComposer.DataComposerHash;
+import org.hdiv.dataComposer.IDataComposer;
+import org.hdiv.util.HDIVUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.context.ServletContextAware;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
+import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 @SpringBootApplication
 public class HdivLiveCombosApplication implements ServletContextAware {
@@ -47,6 +55,25 @@ public class HdivLiveCombosApplication implements ServletContextAware {
         public void addViewControllers(ViewControllerRegistry registry) {
 
         }
+
+        @Override
+        public void addInterceptors(final InterceptorRegistry registry) {
+            registry.addInterceptor(new HandlerInterceptorAdapter() {
+                private static final int ALLOWED_LENGTH = 4000 * 4;
+
+                @Override
+                public boolean preHandle(final HttpServletRequest request, final HttpServletResponse response, final Object handler) throws Exception {
+                    IDataComposer dataComposer = HDIVUtil.getDataComposer();
+                    if (dataComposer instanceof DataComposerHash) {
+                        ((DataComposerHash) dataComposer).setAllowedLength(ALLOWED_LENGTH);
+                    }
+                    if (dataComposer instanceof DataComposerCipher) {
+                        ((DataComposerCipher) dataComposer).setAllowedLength(ALLOWED_LENGTH);
+                    }
+                    return true;
+                }
+            });
+        }
     }
 
     @Bean
@@ -62,7 +89,7 @@ public class HdivLiveCombosApplication implements ServletContextAware {
             builder
                     .randomName(true)
                     .reuseExistingPageInAjaxRequest(true)
-                    .strategy(Strategy.MEMORY)
+                    .strategy(Strategy.CIPHER)
                     .maxPagesPerSession(100)
                     .debugMode(false)
                     .sessionExpired()

@@ -4,9 +4,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.hdiv.dataComposer.DataComposerCipher;
 import org.hdiv.dataComposer.DataComposerHash;
 import org.hdiv.dataComposer.IDataComposer;
-import org.hdiv.urlProcessor.FormUrlProcessor;
 import org.hdiv.urlProcessor.LinkUrlProcessor;
-import org.hdiv.util.Constants;
 import org.hdiv.util.HDIVUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,13 +32,14 @@ public class HdivTransformer implements Transformer {
     }
 
     @Override
-    public Option transform(final String path, final Option option) {
-        return new Option(option.getLabel(), compose(path, option.getValue()));
+    public String transform(final String path, final Object value) {
+        return compose(path, value);
     }
 
     private String compose(final String path, final Object value) {
-        LOGGER.debug("Composing form [{}] field value: [{}] (request started: {})", path, value, dataComposer().isRequestStarted());
-        return dataComposer().composeFormField(path, Objects.toString(value, null), false, null);
+        final String composeFormField = dataComposer().composeFormField(path, Objects.toString(value, null), false, null);
+        LOGGER.debug("Composing form [{}] field value: [{}] (request started: {}): {}", path, value, dataComposer().isRequestStarted(), composeFormField);
+        return composeFormField;
     }
 
     @Override
@@ -50,20 +49,24 @@ public class HdivTransformer implements Transformer {
         }
         final HttpServletRequest httpServletRequest = HttpServletRequestUtils.currentHttpServletRequest();
         final String urlWithModifyStateParameter = modifyHdivStateUrl(url, httpServletRequest);
-        LOGGER.debug("Adding modifyHdivStateParameter to url {} -> {}", url, urlWithModifyStateParameter);
 
         return linkUrlProcessor().processUrl(httpServletRequest, urlWithModifyStateParameter);
     }
 
     private String modifyHdivStateUrl(final String url, final HttpServletRequest httpServletRequest) {
+/*
         final String modifyStateHdivParameter = (String) httpServletRequest.getSession().getAttribute(Constants.MODIFY_STATE_HDIV_PARAMETER);
         final String hdivState = getCsrf();
         final String separator = url.contains("?")? "&" : "?";
+        String modifiedUrl = url;
 
         LOGGER.debug("modifyHdivStateParameter: {}, hdivState: {}", modifyStateHdivParameter, hdivState);
         if (StringUtils.isNotBlank(hdivState)) {
-            return String.format("%s%s%s=%s", url, separator, modifyStateHdivParameter, hdivState);
+            modifiedUrl = String.format("%s%s%s=%s", url, separator, modifyStateHdivParameter, hdivState);
+            LOGGER.debug("Adding modifyHdivStateParameter to url {} -> {}", url, modifiedUrl);
         }
+        return modifiedUrl;
+*/
         return url;
     }
 
@@ -83,15 +86,17 @@ public class HdivTransformer implements Transformer {
             /* Only necessary for 'cipher' or 'hash' strategy */
             if (dataComposer() instanceof DataComposerHash || dataComposer() instanceof DataComposerCipher) {
                 this.csrf = dataComposer().endRequest();
-            } else {
-                final HttpServletRequest httpServletRequest = HttpServletRequestUtils.currentHttpServletRequest();
-                final Object formStateId= httpServletRequest.getAttribute(FormUrlProcessor.FORM_STATE_ID);
-                this.csrf= (String) formStateId;
-/*
-                String hdivStateParamName = (String) httpServletRequest.getSession().getAttribute(Constants.HDIV_PARAMETER);
-                this.csrf = httpServletRequest.getParameter(hdivStateParamName);
-*/
+                LOGGER.debug("HdivState is {}", this.csrf);
             }
+//            else {
+//                final HttpServletRequest httpServletRequest = HttpServletRequestUtils.currentHttpServletRequest();
+//                final Object formStateId= httpServletRequest.getAttribute(FormUrlProcessor.FORM_STATE_ID);
+//                this.csrf= (String) formStateId;
+///*
+//                String hdivStateParamName = (String) httpServletRequest.getSession().getAttribute(Constants.HDIV_PARAMETER);
+//                this.csrf = httpServletRequest.getParameter(hdivStateParamName);
+//*/
+//            }
         }
         return this.csrf;
     }

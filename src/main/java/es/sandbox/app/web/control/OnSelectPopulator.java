@@ -4,7 +4,6 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.SortedSet;
 
 class OnSelectPopulator {
@@ -31,18 +30,11 @@ class OnSelectPopulator {
 
         if (StringUtils.isNotBlank(this.urlPattern)) {
             for (final Option option : options) {
-                if (!option.isEmpty()) {
-                    urls.put(Objects.toString(option.getValue()), transformer.transform(url(option)));
-                }
+                option.setUrl(transformer, this.urlPattern);
+
+                urls.put(option.getDataValue(), option.getUrl());
             }
         }
         return urls;
-    }
-
-    private String url(final Option option) {
-        if (option.isEmpty()) {
-            return "";
-        }
-        return String.format(this.urlPattern, option.getValue());
     }
 }

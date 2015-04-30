@@ -60,19 +60,34 @@
         <div class="row">
             <div class="col-md-4">
                 <form:select path="firstValue" cssClass="form-control">
-                    <form:options items="${firstValues.options}" itemLabel="label" itemValue="value"/>
+                    <c:if test="${not empty firstValues.unselectedOptionLabel}">
+                        <form:option value="">${firstValues.unselectedOptionLabel}</form:option>
+                    </c:if>
+                    <c:forEach var="option" items="${firstValues.options}">
+                        <form:option value="${option.value}" label="${option.label}" data-value="${option.value}"/>
+                    </c:forEach>
                 </form:select>
             </div>
 
             <div class="col-md-4">
                 <form:select path="secondValue" cssClass="form-control">
-                    <form:options items="${secondValues.options}" itemLabel="label" itemValue="value"/>
+                    <c:if test="${not empty secondValues.unselectedOptionLabel}">
+                        <form:option value="">${secondValues.unselectedOptionLabel}</form:option>
+                    </c:if>
+                    <c:forEach var="option" items="${secondValues.options}">
+                        <form:option value="${option.value}" label="${option.label}" data-value="${option.value}"/>
+                    </c:forEach>
                 </form:select>
             </div>
 
             <div class="col-md-4">
                 <form:select path="thirdValue" cssClass="form-control">
-                    <form:options items="${thirdValues.options}" itemLabel="label" itemValue="value"/>
+                    <c:if test="${not empty thirdValues.unselectedOptionLabel}">
+                        <form:option value="">${thirdValues.unselectedOptionLabel}</form:option>
+                    </c:if>
+                    <c:forEach var="option" items="${thirdValues.options}">
+                        <form:option value="${option.value}" label="${option.label}" data-value="${option.value}"/>
+                    </c:forEach>
                 </form:select>
             </div>
         </div>
@@ -108,12 +123,12 @@
         </c:if>
 
         function modifyUrl(url, modifyHdivFormStateParameter, hdivFormState) {
-/*
             if (hdivFormState && url.indexOf(modifyHdivFormStateParameter) == -1) {
-                window.console.log("Adding modify hdiv state parameter:\n" + url + "&" + modifyHdivFormStateParameter + "=" + hdivFormState);
-                return url + "&" + modifyHdivFormStateParameter + "=" + hdivFormState;
+                var position= url.indexOf(modifyHdivFormStateParameter);
+                var suffix= "&" + modifyHdivFormStateParameter + "=" + hdivFormState.val();
+                window.console.log("Adding modify hdiv state parameter:\n" + [url.slice(0, position), suffix, url.slice(position)].join(''));
+                return [url.slice(0, position), suffix, url.slice(position)].join('');
             }
-*/
             window.console.log("Modify hdiv state paramter is already in url (or its not needed): " + url);
             return url;
         }
@@ -124,26 +139,31 @@
             $("form select").change(function () {
                 var changedSelector = $(this);
                 var selectName = changedSelector.attr("name");
-                var selectedValue = changedSelector.find("option:selected").val();
+                var selectedValue = changedSelector.find("option:selected").data("value");
 
-                var url = urls[selectName][selectedValue];
+                if (urls[selectName]) {
+                    var url = urls[selectName][selectedValue];
+                    if (url) {
+                        var hdivFormStateHiddenInput = $("form input[type=hidden][name!=_csrf]").last();
 
-                if (url) {
-                    var hdivFormStateHiddenInput = $("form input[type=hidden][name!=_csrf]").last();
+                        $.getJSON(modifyUrl(url, modifyHdivFormStateParameter, hdivFormStateHiddenInput), function (data) {
 
-                    $.getJSON(modifyUrl(url, modifyHdivFormStateParameter, hdivFormStateHiddenInput.val()), function (data) {
+                            if (data.csrf != null) {
+                                hdivFormStateHiddenInput.val(data.csrf);
+                            }
+                            var targetControl = $("#" + data.path).empty();
 
-                        if(data.csrf != null) {
-                            hdivFormStateHiddenInput.val(data.csrf);
-                        }
-                        var targetControl = $("#" + data.path).empty();
+                            if (data.unselectedOptionLabel) {
+                                targetControl.append("<option value='0' selected='selected'>" + data.unselectedOptionLabel + "</option>");
+                            }
 
-                        $.each(data.options, function (index, option) {
-                            targetControl.append("<option value='" + option.value + "'>" + option.label + "</option>");
+                            $.each(data.options, function (index, option) {
+                                targetControl.append("<option value='" + option.value + "' data-value=" + option.dataValue + ">" + option.label + "</option>");
+                            });
+
+                            urls[data.path] = data.urls;
                         });
-
-                        urls[data.path] = data.urls;
-                    });
+                    }
                 }
             });
         })

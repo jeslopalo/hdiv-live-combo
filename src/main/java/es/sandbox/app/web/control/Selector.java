@@ -1,6 +1,10 @@
 package es.sandbox.app.web.control;
 
 import es.sandbox.app.web.control.Transformer.NopTransformer;
+import org.apache.commons.collections.MapUtils;
+import org.apache.commons.collections.SetUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -11,8 +15,11 @@ import java.util.TreeSet;
  * Created by jeslopalo on 24/04/15.
  */
 public class Selector {
+    private static final Logger LOGGER = LoggerFactory.getLogger(Selector.class);
 
     private String path;
+
+    private final String unselectedOptionLabel;
 
     private final OnSelectPopulator onSelectPopulator;
 
@@ -20,8 +27,13 @@ public class Selector {
     private String csrf;
     private Transformer transformer;
 
+    private transient SortedSet<Option> transformedOptions;
+    private transient Map<String, String> transformedUrls;
+
     public Selector(final SelectorBuilder selectorBuilder, final SortedSet<Option> options) {
         this.path = selectorBuilder.path;
+
+        this.unselectedOptionLabel = selectorBuilder.unselectedOptionLabel;
 
         this.onSelectPopulator = selectorBuilder.onSelectPopulator;
         this.transformer = selectorBuilder.transformer;
@@ -37,20 +49,32 @@ public class Selector {
         return this.path;
     }
 
+    public String getUnselectedOptionLabel() {
+        return this.unselectedOptionLabel;
+    }
+
     public String getPopulatePath() {
         return onSelectPopulator.getPopulatePath();
     }
 
     public SortedSet<Option> getOptions() {
-        final SortedSet<Option> sortedOptions = new TreeSet<>();
-        for (final Option option : this.options) {
-            sortedOptions.add(getTransformer().transform(this.path, option));
+        if (this.transformedOptions == null) {
+            LOGGER.debug("Getting options for path [{}]...", this.path);
+            this.transformedOptions = new TreeSet<>();
+            for (final Option option : this.options) {
+                option.setValue(getTransformer(), this.path);
+                this.transformedOptions.add(option);
+            }
         }
-        return sortedOptions;
+        return SetUtils.unmodifiableSortedSet(this.transformedOptions);
     }
 
     public Map<String, String> getUrls() {
-        return this.onSelectPopulator.getUrls(this.transformer, this.options);
+        if (this.transformedUrls == null) {
+            LOGGER.debug("Getting urls for path [{}]", this.path);
+            this.transformedUrls = this.onSelectPopulator.getUrls(this.transformer, this.options);
+        }
+        return MapUtils.unmodifiableMap(this.transformedUrls);
     }
 
     public String getCsrf() {
@@ -67,6 +91,8 @@ public class Selector {
 
         private SortedSet<Option> options;
         private Transformer transformer;
+
+        private String unselectedOptionLabel;
 
         private OnSelectPopulator onSelectPopulator;
 
@@ -86,6 +112,11 @@ public class Selector {
             if (transformer != null) {
                 this.transformer = transformer;
             }
+            return this;
+        }
+
+        public SelectorBuilder withUnselectedOptionLabel(final String unselectedOptionLabel) {
+            this.unselectedOptionLabel = unselectedOptionLabel;
             return this;
         }
 

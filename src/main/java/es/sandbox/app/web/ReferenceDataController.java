@@ -44,12 +44,12 @@ public class ReferenceDataController {
         return builderForPath(path)
                 .onSelect(populatePath, "http://localhost:8080/data/second-values?path=" + populatePath + "&populate-path=thirdValue&firstValue=%s")
                 .withTransformer(this.transformer)
+                .withUnselectedOptionLabel("Choose one...")
                 .withOptions(
-                        new Option("Choose one..."),
-                        new Option("Option: value 1", 1))
+                        new Option("Option: value 10", 10))
 /*
-                        new Option("Option: value 2", 2),
-                        new Option("Option: value 3", 3))
+                        new Option("Option: value 20", 20),
+                        new Option("Option: value 30", 30))
 */
                 .build();
     }
@@ -61,14 +61,14 @@ public class ReferenceDataController {
         final SelectorBuilder selectorBuilder = builderForPath(path)
                 .onSelect(populatePath, "http://localhost:8080/data/third-values?path=" + populatePath + "&firstValue=" + firstValue + "&secondValue=%s")
                 .withTransformer(this.transformer)
-                .addOption(new Option("Choose one..."));
+                .withUnselectedOptionLabel("Choose one...");
 
         if (NumberUtils.isNumber(firstValue)) {
             selectorBuilder
-                    .addOption(new Option(format("Option: %s value 1", firstValue), calculate(1, firstValue)));
+                    .addOption(new Option(format("Option: %s value 100", firstValue), calculate(100, firstValue)));
 /*
-                    .addOption(new Option(format("Option: %s value 2", firstValue), calculate(2, firstValue)))
-                    .addOption(new Option(format("Option: %s value 3", firstValue), calculate(3, firstValue)));
+                    .addOption(new Option(format("Option: %s value 200", firstValue), calculate(200, firstValue)))
+                    .addOption(new Option(format("Option: %s value 300", firstValue), calculate(300, firstValue)));
 */
         }
 
@@ -81,14 +81,14 @@ public class ReferenceDataController {
 
         final SelectorBuilder selectorBuilder = builderForPath(path)
                 .withTransformer(this.transformer)
-                .addOption(new Option("Choose one..."));
+                .withUnselectedOptionLabel("Choose one...");
 
         if (NumberUtils.isNumber(firstValue) && NumberUtils.isNumber(secondValue)) {
             selectorBuilder
-                    .addOption(new Option(format("Option: %s %s value 1", firstValue, secondValue), calculate(1, firstValue, secondValue)));
+                    .addOption(new Option(format("Option: %s %s value 1000", firstValue, secondValue), calculate(1000, firstValue, secondValue)));
 /*
-                    .addOption(new Option(format("Option: %s %s value 2", firstValue, secondValue), calculate(2, firstValue, secondValue)))
-                    .addOption(new Option(format("Option: %s %s value 3", firstValue, secondValue), calculate(3, firstValue, secondValue)));
+                    .addOption(new Option(format("Option: %s %s value 2000", firstValue, secondValue), calculate(2000, firstValue, secondValue)))
+                    .addOption(new Option(format("Option: %s %s value 3000", firstValue, secondValue), calculate(3000, firstValue, secondValue)));
 */
         }
 
