@@ -97,6 +97,10 @@
 </section>
 
 <section id="map" class="container" style="width: 75%; white-space: nowrap; overflow:hidden; text-overflow: ellipsis;">
+    <p>
+        <span>modifyHdivStateParameter: ${modifyHDIVStateParameter}</span>
+        <span>hdivStateParameter: <script>document.write($("form input[type=hidden][name!=_csrf]").last().attr("name"));</script></span>
+    </p>
     <script>
         var urls = {};
 
