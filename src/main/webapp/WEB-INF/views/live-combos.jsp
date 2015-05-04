@@ -60,9 +60,6 @@
         <div class="row">
             <div class="col-md-4">
                 <form:select path="firstValue" cssClass="form-control">
-                    <c:if test="${not empty firstValues.unselectedOptionLabel}">
-                        <form:option value="">${firstValues.unselectedOptionLabel}</form:option>
-                    </c:if>
                     <c:forEach var="option" items="${firstValues.options}">
                         <form:option value="${option.value}" label="${option.label}" data-value="${option.value}"/>
                     </c:forEach>
@@ -71,9 +68,6 @@
 
             <div class="col-md-4">
                 <form:select path="secondValue" cssClass="form-control">
-                    <c:if test="${not empty secondValues.unselectedOptionLabel}">
-                        <form:option value="">${secondValues.unselectedOptionLabel}</form:option>
-                    </c:if>
                     <c:forEach var="option" items="${secondValues.options}">
                         <form:option value="${option.value}" label="${option.label}" data-value="${option.value}"/>
                     </c:forEach>
@@ -82,9 +76,6 @@
 
             <div class="col-md-4">
                 <form:select path="thirdValue" cssClass="form-control">
-                    <c:if test="${not empty thirdValues.unselectedOptionLabel}">
-                        <form:option value="">${thirdValues.unselectedOptionLabel}</form:option>
-                    </c:if>
                     <c:forEach var="option" items="${thirdValues.options}">
                         <form:option value="${option.value}" label="${option.label}" data-value="${option.value}"/>
                     </c:forEach>
@@ -96,10 +87,47 @@
     </form:form>
 </section>
 
+<style>
+    #map {
+        padding: 3em;
+        color: black;
+    }
+
+    .updating {
+        border: 1px dotted skyblue;
+    }
+
+    .changed {
+        color: red;
+        font-weight: bold;
+
+        -webkit-transition: all 2s ease-out;
+        -moz-transition: all 2s ease-out;
+        -o-transition: all 2s ease-out;
+        transition: all 2s ease-out;
+    }
+</style>
 <section id="map" class="container" style="width: 75%; white-space: nowrap; overflow:hidden; text-overflow: ellipsis;">
     <p>
         <span>modifyHdivStateParameter: ${modifyHDIVStateParameter}</span>
-        <span>hdivStateParameter: <script>document.write($("form input[type=hidden][name!=_csrf]").last().attr("name"));</script></span>
+        <span>hdivStateParameter: <span id="hdiv-form-state-name"></span>, <span id="hdiv-form-state-value"></span>
+            <script>
+                $(function () {
+                    setInterval(function () {
+                        $("#map").addClass("updating");
+                        $("#hdiv-form-state-value").removeClass("changed");
+
+                        $("#hdiv-form-state-name").text($("form input[type=hidden][name!=_csrf]").last().attr("name"));
+                        var oldValue = $("#hdiv-form-state-value").text();
+                        if (oldValue != $("form input[type=hidden][name!=_csrf]").last().val()) {
+                            $("#hdiv-form-state-value").text($("form input[type=hidden][name!=_csrf]").last().val());
+                            $("#hdiv-form-state-value").addClass("changed");
+                        }
+                        $("#map").removeClass("updating");
+                    }, 2000);
+                });
+            </script>
+        </span>
     </p>
     <script>
         var urls = {};
@@ -126,15 +154,8 @@
         };
         </c:if>
 
-        function modifyUrl(url, modifyHdivFormStateParameter, hdivFormState) {
-            if (hdivFormState && url.indexOf(modifyHdivFormStateParameter) == -1) {
-                var position= url.indexOf(modifyHdivFormStateParameter);
-                var suffix= "&" + modifyHdivFormStateParameter + "=" + hdivFormState.val();
-                window.console.log("Adding modify hdiv state parameter:\n" + [url.slice(0, position), suffix, url.slice(position)].join(''));
-                return [url.slice(0, position), suffix, url.slice(position)].join('');
-            }
-            window.console.log("Modify hdiv state paramter is already in url (or its not needed): " + url);
-            return url;
+        function compose(url, position, suffix) {
+            return [url.slice(0, position), suffix, url.slice(position)].join('')
         }
 
         $(function () {
@@ -146,26 +167,21 @@
                 var selectedValue = changedSelector.find("option:selected").data("value");
 
                 if (urls[selectName]) {
-                    var url = urls[selectName][selectedValue];
+                    var url = urls[selectName][selectedValue?selectedValue:""];
                     if (url) {
                         var hdivFormStateHiddenInput = $("form input[type=hidden][name!=_csrf]").last();
 
-                        $.getJSON(modifyUrl(url, modifyHdivFormStateParameter, hdivFormStateHiddenInput), function (data) {
+                        $.getJSON(url, function (data) {
 
                             if (data.csrf != null) {
                                 hdivFormStateHiddenInput.val(data.csrf);
                             }
                             var targetControl = $("#" + data.path).empty();
-
-                            if (data.unselectedOptionLabel) {
-                                targetControl.append("<option value='0' selected='selected'>" + data.unselectedOptionLabel + "</option>");
-                            }
-
                             $.each(data.options, function (index, option) {
                                 targetControl.append("<option value='" + option.value + "' data-value=" + option.dataValue + ">" + option.label + "</option>");
                             });
-
                             urls[data.path] = data.urls;
+                            targetControl.change();
                         });
                     }
                 }

@@ -1,6 +1,5 @@
 package es.sandbox.app;
 
-import es.sandbox.app.web.control.HdivTransformer;
 import es.sandbox.ui.messages.CssClassesByLevel;
 import es.sandbox.ui.messages.Level;
 import es.sandbox.ui.messages.spring.config.annotation.EnableFlashMessages;
@@ -18,31 +17,16 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
-import org.springframework.web.context.ServletContextAware;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 @SpringBootApplication
-public class HdivLiveCombosApplication implements ServletContextAware {
-
-    private ServletContext servletContext;
-
-    @Bean
-    public HdivTransformer hdivTransformer() {
-        return new HdivTransformer(this.servletContext);
-    }
-
-    @Override
-    public void setServletContext(final ServletContext servletContext) {
-        this.servletContext = servletContext;
-    }
-
+public class HdivLiveCombosApplication {
 
     @Bean
     public WebConfig webConfig() {
@@ -63,12 +47,16 @@ public class HdivLiveCombosApplication implements ServletContextAware {
 
                 @Override
                 public boolean preHandle(final HttpServletRequest request, final HttpServletResponse response, final Object handler) throws Exception {
-                    IDataComposer dataComposer = HDIVUtil.getDataComposer();
-                    if (dataComposer instanceof DataComposerHash) {
-                        ((DataComposerHash) dataComposer).setAllowedLength(ALLOWED_LENGTH);
-                    }
-                    if (dataComposer instanceof DataComposerCipher) {
-                        ((DataComposerCipher) dataComposer).setAllowedLength(ALLOWED_LENGTH);
+                    LoggerFactory.getLogger(HdivLiveCombosApplication.class).info("\n=> {}", request.getRequestURL());
+
+                    if (HDIVUtil.isDataComposer(request)) {
+                        IDataComposer dataComposer = HDIVUtil.getDataComposer();
+                        if (dataComposer instanceof DataComposerHash) {
+                            ((DataComposerHash) dataComposer).setAllowedLength(ALLOWED_LENGTH);
+                        }
+                        if (dataComposer instanceof DataComposerCipher) {
+                            ((DataComposerCipher) dataComposer).setAllowedLength(ALLOWED_LENGTH);
+                        }
                     }
                     return true;
                 }

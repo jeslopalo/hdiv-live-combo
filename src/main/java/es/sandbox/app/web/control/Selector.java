@@ -11,6 +11,8 @@ import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 /**
  * Created by jeslopalo on 24/04/15.
  */
@@ -19,12 +21,11 @@ public class Selector {
 
     private String path;
 
-    private final String unselectedOptionLabel;
+//    private final String unselectedOptionLabel;
 
     private final OnSelectPopulator onSelectPopulator;
 
     private SortedSet<Option> options;
-    private String csrf;
     private Transformer transformer;
 
     private transient SortedSet<Option> transformedOptions;
@@ -33,12 +34,23 @@ public class Selector {
     public Selector(final SelectorBuilder selectorBuilder, final SortedSet<Option> options) {
         this.path = selectorBuilder.path;
 
-        this.unselectedOptionLabel = selectorBuilder.unselectedOptionLabel;
 
         this.onSelectPopulator = selectorBuilder.onSelectPopulator;
         this.transformer = selectorBuilder.transformer;
 
-        this.options = options;
+//        this.unselectedOptionLabel = selectorBuilder.unselectedOptionLabel;
+        this.options = addUnselectedOption(options, selectorBuilder.unselectedOptionLabel);
+    }
+
+    private SortedSet<Option> addUnselectedOption(final SortedSet<Option> options, final String unselectedOptionLabel) {
+        final SortedSet<Option> internalOptions = new TreeSet<>();
+
+        if (isNotBlank(unselectedOptionLabel)) {
+            final Option unselectedOption = new Option(unselectedOptionLabel, null);
+            internalOptions.add(unselectedOption);
+        }
+        internalOptions.addAll(options);
+        return internalOptions;
     }
 
     private Transformer getTransformer() {
@@ -49,10 +61,12 @@ public class Selector {
         return this.path;
     }
 
-    public String getUnselectedOptionLabel() {
-        return this.unselectedOptionLabel;
-    }
+    /*
+        private String getUnselectedOptionLabel() {
+            return this.unselectedOptionLabel;
+        }
 
+    */
     public String getPopulatePath() {
         return onSelectPopulator.getPopulatePath();
     }
@@ -61,6 +75,7 @@ public class Selector {
         if (this.transformedOptions == null) {
             LOGGER.debug("Getting options for path [{}]...", this.path);
             this.transformedOptions = new TreeSet<>();
+
             for (final Option option : this.options) {
                 option.setValue(getTransformer(), this.path);
                 this.transformedOptions.add(option);

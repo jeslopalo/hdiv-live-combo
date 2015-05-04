@@ -1,5 +1,7 @@
 package es.sandbox.app.web;
 
+import es.sandbox.app.web.control.Transformer;
+import es.sandbox.app.web.control.Transformer.NopTransformer;
 import es.sandbox.ui.messages.Flash;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,10 +28,12 @@ public class LiveCombosController {
 
     public String get(final Model model, final LiveCombosForm form) {
         LOGGER.debug("Loading form {}...", form);
+        final Transformer transformer = new NopTransformer();
+
         model.addAttribute("liveCombosForm", form);
-        model.addAttribute("firstValues", new ReferenceDataController().getFirstValues("firstValue", "secondValue"));
-        model.addAttribute("secondValues", new ReferenceDataController().getSecondValues("secondValue", "thirdValue", form.getFirstValue()));
-        model.addAttribute("thirdValues", new ReferenceDataController().getThirdValues("thirdValue", form.getFirstValue(), form.getSecondValue()));
+        model.addAttribute("firstValues", new ReferenceDataController(transformer).getFirstValues("firstValue", "secondValue"));
+        model.addAttribute("secondValues", new ReferenceDataController(transformer).getSecondValues("secondValue", "thirdValue", form.getFirstValue()));
+        model.addAttribute("thirdValues", new ReferenceDataController(transformer).getThirdValues("thirdValue", form.getFirstValue(), form.getSecondValue()));
         return "live-combos";
     }
 

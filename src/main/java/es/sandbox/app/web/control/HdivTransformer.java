@@ -5,6 +5,7 @@ import org.hdiv.dataComposer.DataComposerCipher;
 import org.hdiv.dataComposer.DataComposerHash;
 import org.hdiv.dataComposer.IDataComposer;
 import org.hdiv.urlProcessor.LinkUrlProcessor;
+import org.hdiv.util.Constants;
 import org.hdiv.util.HDIVUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,8 +21,8 @@ public class HdivTransformer implements Transformer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HdivTransformer.class);
 
-    private String csrf;
     private ServletContext servletContext;
+    private String csrf;
 
     public HdivTransformer(final ServletContext servletContext) {
         this.servletContext = servletContext;
@@ -54,7 +55,6 @@ public class HdivTransformer implements Transformer {
     }
 
     private String modifyHdivStateUrl(final String url, final HttpServletRequest httpServletRequest) {
-/*
         final String modifyStateHdivParameter = (String) httpServletRequest.getSession().getAttribute(Constants.MODIFY_STATE_HDIV_PARAMETER);
         final String hdivState = getCsrf();
         final String separator = url.contains("?")? "&" : "?";
@@ -66,8 +66,6 @@ public class HdivTransformer implements Transformer {
             LOGGER.debug("Adding modifyHdivStateParameter to url {} -> {}", url, modifiedUrl);
         }
         return modifiedUrl;
-*/
-        return url;
     }
 
     private LinkUrlProcessor linkUrlProcessor() {

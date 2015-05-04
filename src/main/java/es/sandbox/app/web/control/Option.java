@@ -1,6 +1,5 @@
 package es.sandbox.app.web.control;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
@@ -26,7 +25,7 @@ public class Option implements Comparable<Option> {
 
     public Option(String label, Object value, String url) {
         this.label = label;
-        this.dataValue = Objects.toString(value, null);
+        this.dataValue = Objects.toString(value, "");
 
         this.url = url;
     }
@@ -60,16 +59,18 @@ public class Option implements Comparable<Option> {
     }
 
     private String url(final String urlPattern) {
-        if (isEmpty() || isBlank(urlPattern)) {
+        if (isBlank(urlPattern)) {
             return null;
         }
-        return format(urlPattern, this.value);
+        return format(urlPattern, Objects.toString(this.dataValue, ""));
     }
 
 
+/*
     boolean isEmpty() {
         return StringUtils.isEmpty(Objects.toString(this.value, ""));
     }
+*/
 
     @Override
     public String toString() {
@@ -84,10 +85,10 @@ public class Option implements Comparable<Option> {
         if (this.equals(o)) {
             return 0;
         }
-        if (this.value == null) {
+        if (isBlank(Objects.toString(this.dataValue, null))) {
             return -1;
         }
-        if (o.value == null) {
+        if (isBlank(Objects.toString(o.dataValue, null))) {
             return 1;
         }
         if (!equalsIgnoreCase(this.label, o.label)) {
