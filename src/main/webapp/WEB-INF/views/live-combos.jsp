@@ -25,6 +25,8 @@
 
     <!-- Latest compiled and minified JavaScript -->
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+
+    <script src="<c:url value="/resources/scripts/jquery.livecombos.js" />"></script>
 </head>
 <body>
 <section class="container">
@@ -130,6 +132,7 @@
         </span>
     </p>
     <script>
+        <%--
         var urls = {};
 
         <c:if test="${not empty firstValues.urls}">
@@ -138,6 +141,7 @@
             '${url.key}': '<spring:url value="${url.value}"><spring:param name="${modifyHDIVStateParameter}" value="${hdivFormStateId}" /></spring:url>'<c:if test="${!status.last}">, </c:if>
             </c:forEach>
         };
+
         </c:if>
         <c:if test="${not empty secondValues.urls}">
         urls['${secondValues.path}'] = {
@@ -145,6 +149,7 @@
             '${url.key}': '<spring:url value="${url.value}"><spring:param name="${modifyHDIVStateParameter}" value="${hdivFormStateId}" /></spring:url>'<c:if test="${!status.last}">, </c:if>
             </c:forEach>
         };
+
         </c:if>
         <c:if test="${not empty thirdValues.urls}">
         urls['${thirdValues.path}'] = {
@@ -153,33 +158,17 @@
             </c:forEach>
         };
         </c:if>
+        --%>
 
         $(function () {
-            var modifyHdivFormStateParameter = "${modifyHDIVStateParameter}";
-
-            $("form select").change(function () {
-                var changedSelector = $(this);
-                var selectName = changedSelector.attr("name");
-                var selectedValue = changedSelector.find("option:selected").data("value");
-
-                if (urls[selectName]) {
-                    var url = urls[selectName][selectedValue?selectedValue:""];
-                    if (url) {
-                        var hdivFormStateHiddenInput = $("form input[type=hidden][name!=_csrf]").last();
-
-                        $.getJSON(url, function (data) {
-
-                            if (data.csrf != null) {
-                                hdivFormStateHiddenInput.val(data.csrf);
-                            }
-                            var targetControl = $("#" + data.path).empty();
-                            $.each(data.options, function (index, option) {
-                                targetControl.append("<option value='" + option.value + "' data-value=" + option.dataValue + ">" + option.label + "</option>");
-                            });
-                            urls[data.path] = data.urls;
-                            targetControl.change();
-                        });
-                    }
+            $("select#firstValue").liveCombo({
+                urls: {
+                    <c:forEach items="${firstValues.urls}" var="url" varStatus="status">'${url.key}': '<spring:url value="${url.value}"><spring:param name="${modifyHDIVStateParameter}" value="${hdivFormStateId}" /></spring:url>'${!status.last?', ':''}</c:forEach>
+                }
+            });
+            $("select#secondValue").liveCombo({
+                urls: {
+                    <c:forEach items="${secondValues.urls}" var="url" varStatus="status">'${url.key}': '<spring:url value="${url.value}"><spring:param name="${modifyHDIVStateParameter}" value="${hdivFormStateId}" /></spring:url>'${!status.last?', ':''}</c:forEach>
                 }
             });
         })
