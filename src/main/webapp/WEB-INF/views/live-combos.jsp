@@ -154,10 +154,6 @@
         };
         </c:if>
 
-        function compose(url, position, suffix) {
-            return [url.slice(0, position), suffix, url.slice(position)].join('')
-        }
-
         $(function () {
             var modifyHdivFormStateParameter = "${modifyHDIVStateParameter}";
 
