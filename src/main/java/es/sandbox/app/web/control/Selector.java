@@ -14,19 +14,17 @@ import java.util.TreeSet;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
- * Created by jeslopalo on 24/04/15.
+ * @author jeslopalo
+ * @since 24/04/15.
  */
 public class Selector {
     private static final Logger LOGGER = LoggerFactory.getLogger(Selector.class);
 
-    private String path;
-
-//    private final String unselectedOptionLabel;
-
+    private final String path;
     private final OnSelectPopulator onSelectPopulator;
 
-    private SortedSet<Option> options;
-    private Transformer transformer;
+    private final SortedSet<Option> options;
+    private final Transformer transformer;
 
     private transient SortedSet<Option> transformedOptions;
     private transient Map<String, String> transformedUrls;
@@ -34,11 +32,9 @@ public class Selector {
     public Selector(final SelectorBuilder selectorBuilder, final SortedSet<Option> options) {
         this.path = selectorBuilder.path;
 
-
         this.onSelectPopulator = selectorBuilder.onSelectPopulator;
         this.transformer = selectorBuilder.transformer;
 
-//        this.unselectedOptionLabel = selectorBuilder.unselectedOptionLabel;
         this.options = addUnselectedOption(options, selectorBuilder.unselectedOptionLabel);
     }
 
@@ -61,16 +57,11 @@ public class Selector {
         return this.path;
     }
 
-    /*
-        private String getUnselectedOptionLabel() {
-            return this.unselectedOptionLabel;
-        }
-
-    */
     public String getPopulatePath() {
-        return onSelectPopulator.getPopulatePath();
+        return this.onSelectPopulator.getPopulatePath();
     }
 
+    @SuppressWarnings("unchecked")
     public SortedSet<Option> getOptions() {
         if (this.transformedOptions == null) {
             LOGGER.debug("Getting options for path [{}]...", this.path);
@@ -84,6 +75,7 @@ public class Selector {
         return SetUtils.unmodifiableSortedSet(this.transformedOptions);
     }
 
+    @SuppressWarnings("unchecked")
     public Map<String, String> getUrls() {
         if (this.transformedUrls == null) {
             LOGGER.debug("Getting urls for path [{}]", this.path);
@@ -97,7 +89,7 @@ public class Selector {
     }
 
 
-    public static final SelectorBuilder builderForPath(final String path) {
+    public static SelectorBuilder builderForPath(final String path) {
         return new SelectorBuilder(path);
     }
 

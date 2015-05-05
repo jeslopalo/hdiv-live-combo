@@ -15,13 +15,14 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.Objects;
 
 /**
- * Created by jeslopalo on 28/04/15.
+ * @author jeslopalo
+ * @since 28/04/15.
  */
 public class HdivTransformer implements Transformer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HdivTransformer.class);
 
-    private ServletContext servletContext;
+    private final ServletContext servletContext;
     private String csrf;
 
     public HdivTransformer(final ServletContext servletContext) {
@@ -86,15 +87,6 @@ public class HdivTransformer implements Transformer {
                 this.csrf = dataComposer().endRequest();
                 LOGGER.debug("HdivState is {}", this.csrf);
             }
-//            else {
-//                final HttpServletRequest httpServletRequest = HttpServletRequestUtils.currentHttpServletRequest();
-//                final Object formStateId= httpServletRequest.getAttribute(FormUrlProcessor.FORM_STATE_ID);
-//                this.csrf= (String) formStateId;
-///*
-//                String hdivStateParamName = (String) httpServletRequest.getSession().getAttribute(Constants.HDIV_PARAMETER);
-//                this.csrf = httpServletRequest.getParameter(hdivStateParamName);
-//*/
-//            }
         }
         return this.csrf;
     }

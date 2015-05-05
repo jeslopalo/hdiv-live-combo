@@ -1,59 +1,103 @@
-(function ($) {
+/*!
+ * jQuery livecombo plugin
+ * Original author: @jeslopalo
+ * Licensed under the MIT license
+ */
+;
+(function ($, window, document, undefined) {
 
-    $.fn.liveCombo = function (options) {
-
-        //merge default and user parameters
-        var settings = $.extend({
+    // Create the defaults once
+    var pluginName = 'liveCombo',
+        defaults = {
             urls: {},
             fireChangeEventOnTargetSelector: true,
             selectedOptionValue: function (option) {
                 return option.data("value") || "";
-            }
-        }, options);
+            },
+            csrfInputSelector: "form input[type=hidden][name!=_csrf]:last"
+        };
 
-        this.filter("select").change(function () {
-            var urls = settings.urls;
+    // Define urls
+    var _urls = {};
 
-            var selectorName = $(this).attr("name");
-            var selectedOptionValue = getSelectedOptionValue(this);
-
-            var selectedValueUrl = findUrl(urls, selectedOptionValue);
-            if (selectedValueUrl) {
-                $.getJSON(selectedValueUrl, function (data) {
-                    if (data.csrf != null) {
-                        var hdivFormStateHiddenInput = $("form input[type=hidden][name!=_csrf]").last();
-                        hdivFormStateHiddenInput.val(data.csrf);
-                    }
-
-                    var targetControl = $("#" + data.path).empty();
-                    $.each(data.options, function (index, option) {
-                        targetControl.append("<option value='" + option.value + "' data-value=" + option.dataValue + ">" + option.label + "</option>");
-                    });
-                    urls = data.urls;
-
-                    fireChangeEventOnTargetSelectorIfRequired(targetControl);
-                });
-            }
-        });
-
-        function findUrl(urls, selectedOption) {
-            if (urls) {
-                return urls[selectedOption] || null;
-            }
-            return null;
-        }
-
-        function getSelectedOptionValue(selector) {
-            return settings.selectedOptionValue($(selector).find("option:selected")) || "";
-        }
-
-        function fireChangeEventOnTargetSelectorIfRequired(targetControl) {
-            if (settings.fireChangeEventOnTargetSelector) {
-                targetControl.change();
-            }
-        }
-
-        return this;
+    function setUrlsFor(path, urls) {
+        _urls[path] = urls || {};
     };
 
-}(jQuery));
+    function getUrlFor(path, selectedOption) {
+        if (_urls && _urls[path]) {
+            return _urls[path][selectedOption] || null;
+        }
+    };
+
+    // The actual plugin constructor
+    function LiveComboPlugin(element, options) {
+        var base = this;
+
+        base.$element = $(element);
+        base.name = base.$element.attr("name");
+        base.options = $.extend({}, defaults, options);
+
+        // Main function
+        base.populateTargetSelector = function () {
+            var selectedOptionValue = base.getSelectedOptionValue(this);
+            var selectedValueUrl = getUrlFor(base.name, selectedOptionValue);
+
+            if (selectedValueUrl) {
+                $.getJSON(selectedValueUrl, function (data) {
+                    base.updateFormCsrf(data.csrf);
+                    populateSelector(data.path, data.options);
+                    setUrlsFor(data.path, data.urls);
+                    fireChangeEventOnTargetSelectorIfRequired(data.path, base.options);
+                });
+            }
+        };
+
+        base.init();
+    };
+
+    LiveComboPlugin.prototype.init = function () {
+        setUrlsFor(this.name, this.options.urls);
+
+        this.$element.change(this.populateTargetSelector);
+    };
+
+    LiveComboPlugin.prototype.updateFormCsrf = function (csrf) {
+        if (csrf) {
+            $(this.options.csrfInputSelector).val(csrf);
+        }
+    };
+
+    function targetSelector(name) {
+        return $("#" + name);
+    };
+
+    function populateSelector(name, options) {
+        var target = targetSelector(name).empty();
+        $.each(options, function (index, option) {
+            target.append("<option value='" + option.value + "' data-value=" + option.dataValue + ">" + option.label + "</option>");
+        });
+    };
+
+    LiveComboPlugin.prototype.getSelectedOptionValue = function (selector) {
+        if (this.options.selectedOptionValue) {
+            return this.options.selectedOptionValue($(selector).find("option:selected")) || "";
+        }
+    };
+
+    function fireChangeEventOnTargetSelectorIfRequired(name, options) {
+        if (options.fireChangeEventOnTargetSelector === true) {
+            targetSelector(name).change();
+        }
+    };
+
+
+    $.fn[pluginName] = function (options) {
+        return this.filter("select").each(function () {
+            if (!$.data(this, 'plugin_' + pluginName)) {
+                $.data(this, 'plugin_' + pluginName, new LiveComboPlugin(this, options));
+            }
+        });
+    };
+
+})(jQuery, window, document);

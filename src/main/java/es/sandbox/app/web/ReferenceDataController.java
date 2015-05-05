@@ -18,7 +18,8 @@ import static es.sandbox.app.web.control.Selector.SelectorBuilder;
 import static es.sandbox.app.web.control.Selector.builderForPath;
 
 /**
- * Created by jeslopalo on 24/04/15.
+ * @author jeslopalo
+ * @since 24/04/15.
  */
 @RestController
 @RequestMapping("/data")

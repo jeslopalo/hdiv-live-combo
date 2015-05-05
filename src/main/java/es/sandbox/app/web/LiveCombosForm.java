@@ -6,7 +6,8 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 /**
- * Created by jeslopalo on 24/04/15.
+ * @author jeslopalo
+ * @since 24/04/15.
  */
 public class LiveCombosForm {
 
@@ -23,35 +24,35 @@ public class LiveCombosForm {
     private String thirdValue;
 
     public String getFirstValue() {
-        return firstValue;
+        return this.firstValue;
     }
 
-    public void setFirstValue(String firstValue) {
+    public void setFirstValue(final String firstValue) {
         this.firstValue = firstValue;
     }
 
     public String getSecondValue() {
-        return secondValue;
+        return this.secondValue;
     }
 
-    public void setSecondValue(String secondValue) {
+    public void setSecondValue(final String secondValue) {
         this.secondValue = secondValue;
     }
 
     public String getThirdValue() {
-        return thirdValue;
+        return this.thirdValue;
     }
 
-    public void setThirdValue(String thirdValue) {
+    public void setThirdValue(final String thirdValue) {
         this.thirdValue = thirdValue;
     }
 
     @Override
     public String toString() {
         return new ToStringBuilder(this)
-                .append("firstValue", firstValue)
-                .append("secondValue", secondValue)
-                .append("thirdValue", thirdValue)
+                .append("firstValue", this.firstValue)
+                .append("secondValue", this.secondValue)
+                .append("thirdValue", this.thirdValue)
                 .toString();
     }
 }

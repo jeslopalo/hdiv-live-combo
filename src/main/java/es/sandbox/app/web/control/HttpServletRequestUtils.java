@@ -22,7 +22,7 @@ public final class HttpServletRequestUtils { // NO_UCD (test only)
      *
      * @throws NotHttpServletRequestBoundToThreadException
      */
-    public static final HttpServletRequest currentHttpServletRequest() // NO_UCD (use default)
+    public static HttpServletRequest currentHttpServletRequest() // NO_UCD (use default)
             throws NotHttpServletRequestBoundToThreadException {
 
         final ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
