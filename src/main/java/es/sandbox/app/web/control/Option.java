@@ -10,20 +10,21 @@ import static org.apache.commons.lang3.StringUtils.equalsIgnoreCase;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /**
- * Created by jeslopalo on 24/04/15.
+ * @author jeslopalo
+ * @since 24/04/15.
  */
 public class Option implements Comparable<Option> {
-    private String label;
+    private final String label;
     private Object value;
 
-    private String dataValue;
+    private final String dataValue;
     private String url;
 
-    public Option(String label, Object value) {
+    public Option(final String label, final Object value) {
         this(label, value, null);
     }
 
-    public Option(String label, Object value, String url) {
+    public Option(final String label, final Object value, final String url) {
         this.label = label;
         this.dataValue = Objects.toString(value, "");
 
@@ -49,7 +50,7 @@ public class Option implements Comparable<Option> {
     }
 
     public String getUrl() {
-        return url;
+        return this.url;
     }
 
     void setUrl(final Transformer transformer, final String urlPattern) {
@@ -66,22 +67,16 @@ public class Option implements Comparable<Option> {
     }
 
 
-/*
-    boolean isEmpty() {
-        return StringUtils.isEmpty(Objects.toString(this.value, ""));
-    }
-*/
-
     @Override
     public String toString() {
         return new ToStringBuilder(this, ToStringStyle.SIMPLE_STYLE)
-                .append("label", label)
-                .append("value", value)
+                .append("label", this.label)
+                .append("value", this.value)
                 .toString();
     }
 
     @Override
-    public int compareTo(Option o) {
+    public int compareTo(final Option o) {
         if (this.equals(o)) {
             return 0;
         }
@@ -94,6 +89,6 @@ public class Option implements Comparable<Option> {
         if (!equalsIgnoreCase(this.label, o.label)) {
             return this.label.compareTo(o.label);
         }
-        return this.value.toString().compareTo(o.value.toString());
+        return this.dataValue.toString().compareTo(o.dataValue.toString());
     }
 }

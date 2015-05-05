@@ -36,21 +36,21 @@ public class HdivLiveCombosApplication {
     protected static class WebConfig extends WebMvcConfigurerAdapter {
 
         @Override
-        public void addViewControllers(ViewControllerRegistry registry) {
+        public void addViewControllers(final ViewControllerRegistry registry) {
 
         }
 
         @Override
         public void addInterceptors(final InterceptorRegistry registry) {
             registry.addInterceptor(new HandlerInterceptorAdapter() {
-                private static final int ALLOWED_LENGTH = 4000 * 4;
+                private static final int ALLOWED_LENGTH = 4000 * 2;
 
                 @Override
                 public boolean preHandle(final HttpServletRequest request, final HttpServletResponse response, final Object handler) throws Exception {
                     LoggerFactory.getLogger(HdivLiveCombosApplication.class).info("\n=> {}", request.getRequestURL());
 
                     if (HDIVUtil.isDataComposer(request)) {
-                        IDataComposer dataComposer = HDIVUtil.getDataComposer();
+                        final IDataComposer dataComposer = HDIVUtil.getDataComposer();
                         if (dataComposer instanceof DataComposerHash) {
                             ((DataComposerHash) dataComposer).setAllowedLength(ALLOWED_LENGTH);
                         }
@@ -72,7 +72,7 @@ public class HdivLiveCombosApplication {
     protected static class ApplicationWebSecurity extends HdivWebSecurityConfigurerAdapter {
 
         @Override
-        public void configure(SecurityConfigBuilder builder) {
+        public void configure(final SecurityConfigBuilder builder) {
 
             builder
                     .randomName(true)
@@ -85,7 +85,7 @@ public class HdivLiveCombosApplication {
         }
 
         @Override
-        public void addExclusions(ExclusionRegistry registry) {
+        public void addExclusions(final ExclusionRegistry registry) {
             registry.addUrlExclusions("/");
         }
     }
@@ -104,12 +104,12 @@ public class HdivLiveCombosApplication {
          * with twitter bootstrap alerts
          */
         @Override
-        public void configureCssClassesByLevel(CssClassesByLevel cssClasses) {
+        public void configureCssClassesByLevel(final CssClassesByLevel cssClasses) {
             cssClasses.put(Level.ERROR, "alert alert-danger");
         }
     }
 
-    public static void main(String[] args) {
+    public static void main(final String[] args) {
         SpringApplication.run(HdivLiveCombosApplication.class, args);
     }
 }

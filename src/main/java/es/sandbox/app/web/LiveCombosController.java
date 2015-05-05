@@ -14,7 +14,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import javax.validation.Valid;
 
 /**
- * Created by jeslopalo on 24/04/15.
+ * @author jeslopalo
+ * @since 24/04/15.
  */
 @Controller
 @RequestMapping("/live-combos")
@@ -46,6 +47,7 @@ public class LiveCombosController {
         }
 
         flash.success("LiveCombosController.post.success");
+        flash.success("LiveCombosController.post.selection", liveCombosForm.getFirstValue(), liveCombosForm.getSecondValue(), liveCombosForm.getThirdValue());
         LOGGER.debug("Form has been validated: {}", liveCombosForm);
         return "redirect:/";
     }

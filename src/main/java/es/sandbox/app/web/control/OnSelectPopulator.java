@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.SortedSet;
 
-class OnSelectPopulator {
+final class OnSelectPopulator {
 
     private final String populatePath;
     private final String urlPattern;
