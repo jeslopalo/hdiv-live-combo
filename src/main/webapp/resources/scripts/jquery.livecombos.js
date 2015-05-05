@@ -18,42 +18,39 @@
         };
 
     // Define urls
-    var _urls = {};
+    var urlsToPopulateCombos = {};
 
     function setUrlsFor(path, urls) {
-        _urls[path] = urls || {};
+        urlsToPopulateCombos[path] = urls || {};
     };
 
     function getUrlFor(path, selectedOption) {
-        if (_urls && _urls[path]) {
-            return _urls[path][selectedOption] || null;
+        if (urlsToPopulateCombos && urlsToPopulateCombos[path]) {
+            return urlsToPopulateCombos[path][selectedOption] || null;
         }
     };
 
     // The actual plugin constructor
     function LiveComboPlugin(element, options) {
-        var base = this;
+        var plugin = this;
 
-        base.$element = $(element);
-        base.name = base.$element.attr("name");
-        base.options = $.extend({}, defaults, options);
+        plugin.$element = $(element);
+        plugin.name = plugin.$element.attr("name");
+        plugin.options = $.extend({}, defaults, options);
 
-        // Main function
-        base.populateTargetSelector = function () {
-            var selectedOptionValue = base.getSelectedOptionValue(this);
-            var selectedValueUrl = getUrlFor(base.name, selectedOptionValue);
+        // Main plugin work
+        plugin.populateTargetSelector = function () {
+            var selectedOptionValue = plugin.getSelectedOptionValue(this);
+            var selectedValueUrl = getUrlFor(plugin.name, selectedOptionValue);
 
             if (selectedValueUrl) {
                 $.getJSON(selectedValueUrl, function (data) {
-                    base.updateFormCsrf(data.csrf);
-                    populateSelector(data.path, data.options);
-                    setUrlsFor(data.path, data.urls);
-                    fireChangeEventOnTargetSelectorIfRequired(data.path, base.options);
+                    updateForm(plugin, data);
                 });
             }
         };
 
-        base.init();
+        plugin.init();
     };
 
     LiveComboPlugin.prototype.init = function () {
@@ -68,21 +65,29 @@
         }
     };
 
-    function targetSelector(name) {
-        return $("#" + name);
-    };
-
-    function populateSelector(name, options) {
-        var target = targetSelector(name).empty();
-        $.each(options, function (index, option) {
-            target.append("<option value='" + option.value + "' data-value=" + option.dataValue + ">" + option.label + "</option>");
-        });
-    };
-
     LiveComboPlugin.prototype.getSelectedOptionValue = function (selector) {
         if (this.options.selectedOptionValue) {
             return this.options.selectedOptionValue($(selector).find("option:selected")) || "";
         }
+    };
+
+    function updateForm(plugin, data) {
+
+        plugin.updateFormCsrf(data.csrf);
+        populateSelectorOptions(data.path, data.options);
+        setUrlsFor(data.path, data.urls);
+        fireChangeEventOnTargetSelectorIfRequired(data.path, plugin.options);
+    }
+
+    function targetSelector(name) {
+        return $("#" + name);
+    };
+
+    function populateSelectorOptions(name, options) {
+        var target = targetSelector(name).empty();
+        $.each(options, function (index, option) {
+            target.append("<option value='" + option.value + "' data-value=" + option.dataValue + ">" + option.label + "</option>");
+        });
     };
 
     function fireChangeEventOnTargetSelectorIfRequired(name, options) {
