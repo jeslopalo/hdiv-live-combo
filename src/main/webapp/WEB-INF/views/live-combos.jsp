@@ -3,8 +3,6 @@
 <%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
-<%@ taglib prefix="hdiv" tagdir="/WEB-INF/tags/hdiv" %>
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -88,42 +86,37 @@
 
         <div class="row">
             <div class="col-md-4">
-                <hdiv:live-combo selector="${firstValues}" cssClass="form-control" />
-<%--
-                <form:select path="firstValue" cssClass="form-control">
+                    <%--<live:combo selector="${firstValues}" cssClass="form-control"/>--%>
+                <form:select path="${firstValues.path}" cssClass="form-control">
                     <c:forEach var="option" items="${firstValues.options}">
                         <form:option value="${option.value}" label="${option.label}" data-value="${option.value}"/>
                     </c:forEach>
                 </form:select>
---%>
             </div>
-
             <div class="col-md-4">
-                <hdiv:live-combo selector="${secondValues}" cssClass="form-control" />
-<%--
-                <form:select path="secondValue" cssClass="form-control">
+                    <%--<live:combo selector="${secondValues}" cssClass="form-control"/>--%>
+                <form:select path="${secondValues.path}" cssClass="form-control">
                     <c:forEach var="option" items="${secondValues.options}">
                         <form:option value="${option.value}" label="${option.label}" data-value="${option.value}"/>
                     </c:forEach>
                 </form:select>
---%>
-            </div>
 
+            </div>
             <div class="col-md-4">
-                <hdiv:live-combo selector="${thirdValues}" cssClass="form-control" />
-<%--
-                <form:select path="thirdValue" cssClass="form-control">
+                    <%--<live:combo selector="${thirdValues}" cssClass="form-control"/>--%>
+                <form:select path="${thirdValues.path}" cssClass="form-control">
                     <c:forEach var="option" items="${thirdValues.options}">
                         <form:option value="${option.value}" label="${option.label}" data-value="${option.value}"/>
                     </c:forEach>
                 </form:select>
---%>
+
             </div>
         </div>
         <div class="botonera">
             <input type="submit" class="btn btn-primary"/>
         </div>
     </form:form>
+
     <script>
         $(function () {
             $("select#firstValue").liveCombo({
