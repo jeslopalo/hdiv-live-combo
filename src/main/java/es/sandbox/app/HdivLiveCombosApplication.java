@@ -77,7 +77,7 @@ public class HdivLiveCombosApplication {
             builder
                     .randomName(true)
                     .reuseExistingPageInAjaxRequest(true)
-                    .strategy(Strategy.CIPHER)
+                    .strategy(Strategy.MEMORY)
                     .maxPagesPerSession(100)
                     .debugMode(false)
                     .sessionExpired()
