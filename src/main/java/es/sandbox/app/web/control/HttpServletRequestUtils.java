@@ -4,6 +4,7 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Objects;
 
 
 public final class HttpServletRequestUtils { // NO_UCD (test only)
@@ -31,5 +32,9 @@ public final class HttpServletRequestUtils { // NO_UCD (test only)
         }
 
         return attributes.getRequest();
+    }
+
+    public static Object getAttributeFromCurrentHttpServletRequest(final String attributeName) {
+        return currentHttpServletRequest().getAttribute(attributeName);
     }
 }

@@ -1,8 +1,6 @@
 package es.sandbox.app.web.control;
 
 import org.apache.commons.lang3.StringUtils;
-import org.hdiv.dataComposer.DataComposerCipher;
-import org.hdiv.dataComposer.DataComposerHash;
 import org.hdiv.dataComposer.IDataComposer;
 import org.hdiv.urlProcessor.LinkUrlProcessor;
 import org.hdiv.util.Constants;
@@ -57,15 +55,17 @@ public class HdivTransformer implements Transformer {
 
     private String modifyHdivStateUrl(final String url, final HttpServletRequest httpServletRequest) {
         final String modifyStateHdivParameter = (String) httpServletRequest.getSession().getAttribute(Constants.MODIFY_STATE_HDIV_PARAMETER);
-        final String hdivState = getCsrf();
+        final String hdivState = hdivState();
         final String separator = url.contains("?")? "&" : "?";
         String modifiedUrl = url;
 
         LOGGER.debug("modifyHdivStateParameter: {}, hdivState: {}", modifyStateHdivParameter, hdivState);
+/*
         if (StringUtils.isNotBlank(hdivState)) {
             modifiedUrl = String.format("%s%s%s=%s", url, separator, modifyStateHdivParameter, hdivState);
             LOGGER.debug("Adding modifyHdivStateParameter to url {} -> {}", url, modifiedUrl);
         }
+*/
         return modifiedUrl;
     }
 
@@ -77,16 +77,20 @@ public class HdivTransformer implements Transformer {
         return this.servletContext;
     }
 
+    public String hdivState() {
+        return getCsrf();
+    }
+
     @Override
     public String getCsrf() {
 
         if (this.csrf == null) {
             /* Add new state to the response */
             /* Only necessary for 'cipher' or 'hash' strategy */
-            if (dataComposer() instanceof DataComposerHash || dataComposer() instanceof DataComposerCipher) {
-                this.csrf = dataComposer().endRequest();
-                LOGGER.debug("HdivState is {}", this.csrf);
-            }
+//            if (dataComposer() instanceof DataComposerHash || dataComposer() instanceof DataComposerCipher) {
+            this.csrf = dataComposer().endRequest();
+            LOGGER.debug("HdivState is {}", this.csrf);
+//            }
         }
         return this.csrf;
     }

@@ -76,12 +76,11 @@ public class HdivLiveCombosApplication {
 
             builder
                     .randomName(true)
-                    .reuseExistingPageInAjaxRequest(true)
+//                    .reuseExistingPageInAjaxRequest(false)
                     .strategy(Strategy.MEMORY)
-                    .maxPagesPerSession(100)
+//                    .maxPagesPerSession(5)
                     .debugMode(false)
-                    .sessionExpired()
-                    .homePage("/");
+                    .sessionExpired().homePage("/");
         }
 
         @Override
